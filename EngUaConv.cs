@@ -1,11 +1,11 @@
 ﻿namespace EngUaConverter
 {
-    public class EngUaConv
+    static class EngUaConv
     {
-        private Dictionary<char, char> dict;        
-        private string convertedLine = string.Empty;
-        private bool isUa2Eng;
-        private void FillEng2UaDict()
+        private static Dictionary<char, char> eng2ua;
+        private static Dictionary<char, char> ua2eng;
+        private static string convertedLine = string.Empty;       
+        private static void FillEng2UaDict(Dictionary<char, char> dict)
         {
             dict.Add('q', 'й');
             dict.Add('w', 'ц');
@@ -59,7 +59,7 @@
             dict.Add('^', ':');
             dict.Add('&', '?');
         }
-        private void FillUa2EngDict()
+        private static void FillUa2EngDict(Dictionary<char, char> dict)
         {
             dict.Add('й', 'q');
             dict.Add('ц', 'w');
@@ -116,32 +116,23 @@
             dict.Add(';', '$');
             dict.Add(':', '^');
             dict.Add('?', '&');
-        }
-        /// <summary>
-        /// Creates converter class 
-        /// </summary>
-        /// <param name="isEng2Ua">if u want to convert from ua2eng - false</param>
-        public EngUaConv(bool isEng2Ua = true) 
-        { 
-            dict = new Dictionary<char, char>();
-            isUa2Eng = !isEng2Ua;
-            if (isEng2Ua)
-                FillEng2UaDict();
-            else
-                FillUa2EngDict();
-             
         }      
-        /// <summary>
-        /// Converts an english/ukrainian garbage line to ukrainian/english normal line
-        /// </summary>
-        /// <param name="line">Line to convert from</param>
-        public void Convert(string line)
+        static EngUaConv() 
+        {
+            eng2ua = new Dictionary<char, char>();
+            ua2eng = new Dictionary<char, char>();
+            FillEng2UaDict(eng2ua);
+            FillUa2EngDict(ua2eng);             
+        }            
+        private static void Convert(string line, bool isUa2Eng)
         {
             line ??= string.Empty;
             if (line == string.Empty)
                 convertedLine = "No Data! Please enter some text.";
             else
             {
+                Dictionary<char, char> dict;
+                dict = (isUa2Eng) ? ua2eng : eng2ua;
                 string newLine = string.Empty, lowerLine = line.ToLower();
                 for (int i = 0; i < line.Length; i++)
                 {
@@ -161,9 +152,25 @@
             }           
         }
         /// <summary>
-        /// Returns converted line
+        /// Convert english garbage line to ukrainian normal one
         /// </summary>
+        /// <param name="line">Line to convert</param>
         /// <returns>string convertedLine</returns>
-        public override string ToString() { return convertedLine; }              
+        public static string Eng2Ua(string line)
+        {
+            Convert(line, isUa2Eng:false);
+            return convertedLine;
+        }
+        /// <summary>
+        /// Convert ukrainian garbage line to english normal one
+        /// </summary>
+        /// <param name="line">Line to convert</param>
+        /// <returns>string convertedLine</returns>
+        public static string Ua2Eng(string line)
+        {
+            Convert(line, isUa2Eng: true);
+            return convertedLine;
+        }
+        
     }
 }
